@@ -2,11 +2,13 @@ import json
 import boto3
 from botocore.exceptions import ClientError
 
+
 # Инициализируем клиент DynamoDB
 dynamodb = boto3.resource('dynamodb')
 client = boto3.client('dynamodb')
 
 def create(event, context):
+
     # Получаем таблицы из переменных окружения
     products_table = dynamodb.Table('products')
     stocks_table = dynamodb.Table('stocks')

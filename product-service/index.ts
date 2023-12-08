@@ -1,8 +1,19 @@
 #!/usr/bin/env node
 import * as cdk from 'aws-cdk-lib';
-import { aws_lambda as lambda } from 'aws-cdk-lib';
+
 import { aws_apigateway as apigateway } from 'aws-cdk-lib';
 import { aws_dynamodb as dynamodb } from 'aws-cdk-lib';
+import { Stack, StackProps } from 'aws-cdk-lib';
+import { Construct } from 'constructs';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as sqs from 'aws-cdk-lib/aws-sqs';
+import * as lambdaEventSources from 'aws-cdk-lib/aws-lambda-event-sources';
+
+import { Topic,  SubscriptionFilter  } from 'aws-cdk-lib/aws-sns';
+import { EmailSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
+
+
+
 
 export class LambdaApiGatewayStack extends cdk.Stack {
   constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
@@ -100,6 +111,67 @@ export class LambdaApiGatewayStack extends cdk.Stack {
     // Создание метода POST для ресурса /products, который триггерит созданную Lambda функцию
     productsResource.addMethod('POST', new apigateway.LambdaIntegration(createProductLambda));
 
+////////////////TASK 6 TASK 6 TASK 6////////////////////////////////////////////////////////////////////////////
+     // Создаем очередь SQS
+    const catalogItemsQueue = new sqs.Queue(this, 'catalogItemsQueue', {
+      queueName: 'catalogItemsQueue'
+    });
+     // Создаем функцию Lambda
+    const catalogBatchProcess = new lambda.Function(this, 'catalogBatchProcess', {
+      functionName: 'catalogBatchProcess',
+      runtime: lambda.Runtime.PYTHON_3_8,
+      code: lambda.Code.fromAsset('./BE_logic6'), // Укажите путь к коду вашей Lambda функции
+      handler: 'lambda_function6.lambda_handler' // предполагается, что ваш обработчик находится в index.js и называется handler
+    });
+       // Предоставление Lambda функции прав на запись в таблицу Products
+    productsTable.grantWriteData(catalogBatchProcess);  //3
+    // Предоставление Lambda функции прав на запись в таблицу stocks
+    stocksTable.grantReadWriteData(catalogBatchProcess)
+
+    // Настройка триггера Lambda на события из SQS
+    catalogBatchProcess.addEventSource(new lambdaEventSources.SqsEventSource(catalogItemsQueue, {
+      batchSize: 5 // Количество сообщений, обрабатываемых за один раз
+    }));
+
+    ///////TASK 6.3 //////////////TASK 6.3 ///////////////  TASK 6.3
+     // Создание SNS темы
+    const createProductTopic = new Topic(this, 'createProductTopic', {
+      topicName: 'create-product-topic',
+    });
+
+        // Добавление подписки с электронной почтой без фильтра
+    createProductTopic.addSubscription(new EmailSubscription('deniszmail@gmail.com'));
+
+    // Создание политики фильтрации для подписки
+    const filterPolicy = {
+      description: SubscriptionFilter.stringFilter({
+        allowlist: ['BYCIKLE']
+      })
+    };
+
+    // Добавление подписки с электронной почтой с фильтром
+    createProductTopic.addSubscription(new EmailSubscription('korolyovakristina96@gmail.com', {
+      filterPolicy
+    }));
+
+
+//     // Добавление подписки с электронной почтой
+//     const emailSubscription = new EmailSubscription('deniszmail@gmail.com');
+//     createProductTopic.addSubscription(emailSubscription);
+//
+//     const filterPolicy = {
+//       description: sns.SubscriptionFilter.stringFilter({
+//         whitelist: ['BYCIKLE']
+//       })
+//     };
+//
+//     createProductTopic.addSubscription(new EmailSubscription('korolyovakristina96@gmail.com', {
+//       filterPolicy: filterPolicy
+//     }));
+
+
+// korolyovakristina96@gmail.com
+
     new cdk.CfnOutput(this, 'ApiUrl', {
       value: api.url,
     });
@@ -107,3 +179,8 @@ export class LambdaApiGatewayStack extends cdk.Stack {
   }
 }
 
+const app = new cdk.App();
+new LambdaApiGatewayStack(app, 'LUNA2045', {   //  название стека
+    env: { account: '761576343621', region: 'us-east-1' }, //
+});
+app.synth();
