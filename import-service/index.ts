@@ -17,7 +17,7 @@ export class ImportServiceStack extends cdk.Stack {
         // Определение Lambda функции1
         const importProductsFileLambda = new lambda.Function(this, 'importProductsFileLambda', {
           runtime: lambda.Runtime.PYTHON_3_8,
-          code: lambda.Code.fromAsset('./logic1'), // здесь
+          code: lambda.Code.fromAsset('./logic1_importProductsFile'), // здесь
           handler: 'lambda_function1.handler1',
           environment: {
             BUCKET: 'lunaxxximportservicebacket', //  имя  S3 бакета
@@ -27,7 +27,7 @@ export class ImportServiceStack extends cdk.Stack {
          // Создание Lambda функции 2
         const importFileParser = new lambda.Function(this, 'ImportFileParser', {
           runtime: lambda.Runtime.PYTHON_3_8,
-          code: lambda.Code.fromAsset('./logic2'), //  путь к коду Lambda
+          code: lambda.Code.fromAsset('./logic2_importFileParser'), //  путь к коду Lambda
           handler: 'lambda_function2.handler', // Файл и обработчик в Lambda
         });
 
@@ -77,6 +77,12 @@ export class ImportServiceStack extends cdk.Stack {
               },
             },
           ],
+        });
+
+        // Экспорт идентификатора REST API
+        new cdk.CfnOutput(this, 'ApiGatewayRestApiId', {
+          value: api.restApiId,
+          exportName: 'ImportServiceApiId'
         });
 
     }

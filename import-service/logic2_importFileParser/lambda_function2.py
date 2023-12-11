@@ -2,7 +2,7 @@ import boto3
 import csv
 import os
 import json
-
+# ////////////////////////////////importFileParser /////////////////
 s3_client = boto3.client('s3')
 sqs_client = boto3.client('sqs')
 # sqs_queue_url = os.environ['SQS_QUEUE_URL']  # URL очереди SQS
