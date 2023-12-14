@@ -17,7 +17,7 @@ url = "https://h439o1jara.execute-api.us-east-1.amazonaws.com/dev/products"
 # Данные продукта для отправки
 product_data = {
     "description": "BYCIKLE small green",
-    "id": "2554",
+    "id": "2555554",
     "price": "476",
     "title": "BYCIKLE small green",
     "count": "3663"
@@ -28,4 +28,12 @@ response = requests.post(url, data=json.dumps(product_data), headers={"Content-T
 
 #
 print(response.text)
+
+{
+    "description": "BYCIKLE small green",
+    "id": "2555554",
+    "price": "476",
+    "title": "BYCIKLE small green",
+    "count": "3663"
+}
 

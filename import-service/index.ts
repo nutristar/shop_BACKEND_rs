@@ -12,40 +12,40 @@ export class ImportServiceStack extends cdk.Stack {
     super(scope, id, props);
 
         //import existing s3
-        const xxximportservicebacket = s3.Bucket.fromBucketAttributes(this, 'xxximportservicebacket',  { bucketArn: "arn:aws:s3:::xxximportservicebacket"});
+        const lunaxxximportservicebacket = s3.Bucket.fromBucketAttributes(this, 'lunaxxximportservicebacket',  { bucketArn: "arn:aws:s3:::lunaxxximportservicebacket"});
 
         // Определение Lambda функции1
         const importProductsFileLambda = new lambda.Function(this, 'importProductsFileLambda', {
           runtime: lambda.Runtime.PYTHON_3_8,
-          code: lambda.Code.fromAsset('./logic1'), // здесь
+          code: lambda.Code.fromAsset('./logic1_importProductsFile'), // здесь
           handler: 'lambda_function1.handler1',
           environment: {
-            BUCKET: 'xxximportservicebacket', //  имя  S3 бакета
+            BUCKET: 'lunaxxximportservicebacket', //  имя  S3 бакета
           },
         });
 
          // Создание Lambda функции 2
         const importFileParser = new lambda.Function(this, 'ImportFileParser', {
           runtime: lambda.Runtime.PYTHON_3_8,
-          code: lambda.Code.fromAsset('./logic2'), //  путь к коду Lambda
+          code: lambda.Code.fromAsset('./logic2_importFileParser'), //  путь к коду Lambda
           handler: 'lambda_function2.handler', // Файл и обработчик в Lambda
         });
 
         // Настройка Lambda для реакции на события ObjectCreated в папке 'uploaded'
-        xxximportservicebacket.addEventNotification(
+        lunaxxximportservicebacket.addEventNotification(
             s3.EventType.OBJECT_CREATED,
             new s3n.LambdaDestination(importFileParser),
             { prefix: 'uploaded/' } // Только для объектов в папке 'uploaded'
             );
 
             // Добавление разрешений для Lambda функции на чтение и запись в S3 бакет
-        xxximportservicebacket.grantReadWrite(importFileParser);
+        lunaxxximportservicebacket.grantReadWrite(importFileParser);
 
         // Создание новой роли и политики для Lambda, чтобы она могла взаимодействовать с S3
         const s3Policy = new iam.PolicyStatement({
           actions: ['s3:GetObject', 's3:PutObject'],
           resources: [
-            `arn:aws:s3:::xxximportservicebacket/*`,
+            `arn:aws:s3:::lunaxxximportservicebacket/*`,
 
           ],  });
 
@@ -79,11 +79,17 @@ export class ImportServiceStack extends cdk.Stack {
           ],
         });
 
+        // Экспорт идентификатора REST API
+        new cdk.CfnOutput(this, 'ApiGatewayRestApiId', {
+          value: api.restApiId,
+          exportName: 'ImportServiceApiId'
+        });
+
     }
 }
 
 const app = new cdk.App();
-new ImportServiceStack(app, 'ImportServiceStack222', {   //  название стека  свл вуздщн
+new ImportServiceStack(app, 'importpart000LUNA2045', {   //  название стека  свл вуздщн
     env: { account: '761576343621', region: 'us-east-1' }, //
 });
 app.synth();
