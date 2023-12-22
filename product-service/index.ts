@@ -180,7 +180,7 @@ export class LambdaApiGatewayStack extends cdk.Stack {
 }
 
 const app = new cdk.App();
-new LambdaApiGatewayStack(app, 'LUNA2045', {   //  название стека
+new LambdaApiGatewayStack(app, 'GELIOS3088', {   //  название стека
     env: { account: '761576343621', region: 'us-east-1' }, //
 });
 app.synth();
