@@ -16,6 +16,7 @@ export class MyDatabaseStack extends Stack {
       }),
       instanceType: new ec2.InstanceType('t2.micro'),
       vpc,
+      allowMajorVersionUpgrade: true,
       //
     });
   }
