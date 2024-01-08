@@ -10,6 +10,9 @@ export class BffService {
   async forwardRequest(req: Request): Promise<any> {
     const recipientServiceName = req.url.split('/')[1]; // Extract service name from URL
     const recipientURL = process.env[`${recipientServiceName.toUpperCase()}_URL`];
+//
+//     const recipientServiceName = req.url.split('/')[1]; // Extract service name from URL
+//     const recipientURL = process.env[`${recipientServiceName.toUpperCase()}_URL`];
 
     if (!recipientURL) {
       throw new Error("Recipient service URL not found");
